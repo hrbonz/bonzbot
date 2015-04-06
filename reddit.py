@@ -21,7 +21,7 @@ class Plugin(object):
         init(bot.config['reddit'])
 
     def msg_submission(self, target, submission):
-        msg_submission(self.bot, mask.nick, submission)
+        msg_submission(self.bot, target, submission)
 
     def help(self, target):
         """/r/devel
