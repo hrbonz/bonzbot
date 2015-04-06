@@ -88,7 +88,7 @@ def init(conf):
 
 
 def msg_submission(bot, target, submission):
-    bot.privmsg(target, u"{} [/u/{} in /r/{}] ({})".format(
+    bot.privmsg(target, u"{} [/u/{} in /r/{}] {}".format(
         submission.title,
         submission.author.name,
         submission.subreddit.display_name,
