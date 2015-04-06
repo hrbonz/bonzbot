@@ -44,7 +44,6 @@ class Plugin(object):
         %%r
         %%r <cmd>
         """
-        print(mask, target, args)
         if args['<cmd>'] is None or args['<cmd>'] == 'help':
             self.help(mask.nick)
         elif args['<cmd>'] == "latest":
