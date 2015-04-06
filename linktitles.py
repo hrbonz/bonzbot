@@ -19,7 +19,9 @@ class Plugin(object):
 
     def get_title(self,link):
         try:
-            soup = bs4.BeautifulSoup(urllib2.urlopen(link, timeout=5))
+            req = urllib2.Request(link,
+                headers={"Accept-Language" : "fr-FR, fr, en"})
+            soup = bs4.BeautifulSoup(urllib2.urlopen(req, timeout=5))
         except urllib2.HTTPError as e:
             return u"{}: {}".format(e.code, e.msg)
         if soup.title is not None:
