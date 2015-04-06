@@ -47,7 +47,7 @@ class Plugin(object):
         if args['<cmd>'] is None or args['<cmd>'] == 'help':
             self.help(mask.nick)
         elif args['<cmd>'] == "latest":
-            self.msg_submission(target,
+            self.msg_submission(mask.nick,
                                 self._sub.get_new(limit=1).next())
         elif args['<cmd>'] == "last":
             for submission in self._sub.get_new(limit=10):
