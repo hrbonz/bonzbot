@@ -26,7 +26,7 @@ class Plugin(object):
     def help(self, target):
         """/r/devel
         usage: !r <action>
-        Action can be on the following:
+        Action can be one of the following:
             * latest: get the latest submission to date
             * last: get the last 10 submissions
         """
