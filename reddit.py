@@ -106,6 +106,7 @@ def get_latest(sub, latest, offset=0):
         return []
     new = []
     lim = 10 + offset * 10
+    # FIXME catch StoppIteration and "do the right thing"
     submissions = get_new(sub, limit=lim)
     for i in range(offset * 10):
         submissions.next()
