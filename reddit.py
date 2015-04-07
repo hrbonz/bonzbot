@@ -48,12 +48,13 @@ class Plugin(object):
             self.help(mask.nick)
         elif args['<cmd>'] == "latest":
             self.msg_submission(mask.nick,
-                                self._sub.get_new(limit=1).next())
+                                get_new(sel._sub, limit=1).next())
         elif args['<cmd>'] == "last":
-            for submission in self._sub.get_new(limit=10):
+            for submission in get_new(self._sub, limit=10):
                 self.msg_submission(mask.nick, submission)
         else:
             self.help(mask.nick)
+
 
 def lsns():
     global _CACHE
@@ -82,10 +83,9 @@ def init(conf):
         subobj = r.get_subreddit(sub)
         setcache(sub, 'sub', subobj)
         try:
-            setcache(sub, 'latest', subobj.get_new(limit=1).next())
-        except (StopIteration, irc3.HTTPError):
+            setcache(sub, 'latest', get_new(subobj, limit=1).next())
+        except StopIteration:
             setcache(sub, 'latest', None)
-
 
 def msg_submission(bot, target, submission):
     bot.privmsg(target, u"{} [/u/{} in /r/{}] {}".format(
@@ -94,6 +94,11 @@ def msg_submission(bot, target, submission):
         submission.subreddit.display_name,
         submission.url))
 
+def get_new(sub, limit=10):
+    try:
+        return sub.get_new(limit=limit)
+    except irc3.HTTPError:
+        return None
 
 def get_latest(sub, latest, offset=0):
     """get a list of submissions made since ``latest`` submission"""
@@ -101,7 +106,7 @@ def get_latest(sub, latest, offset=0):
         return []
     new = []
     lim = 10 + offset * 10
-    submissions = sub.get_new(limit=lim)
+    submissions = get_new(sub, limit=lim)
     for i in range(offset * 10):
         submissions.next()
     i = 0
@@ -116,16 +121,16 @@ def get_latest(sub, latest, offset=0):
 
 
 @cron('*/1 * * * *')
-def get_new(bot):
+def poll_new(bot):
     for ns in lsns():
         latest = getcache(ns, 'latest')
         sub = getcache(ns, 'sub')
         if latest is None:
             try:
-                setcache(ns, 'latest', sub.get_new(limit=1).next())
+                setcache(ns, 'latest', get_new(sub, limit=1).next())
                 for target in get('__all__', 'echo'):
                     msg_submission(bot, target, getcache(ns, 'latest'))
-            except (StopIteration, irc3.HTTPError):
+            except StopIteration:
                 setcache(ns, 'latest', None)
         else:
             bot.log.info("[reddit] get latest submissions from "
