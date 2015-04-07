@@ -78,6 +78,7 @@ def getcache(ns, key):
 
 def init(conf):
     setcache('__all__', 'echo', utils.as_list(conf['echo_channels']))
+    setcache('__all__', 'msg', unicode(conf['echo_msg']))
     for sub in utils.as_list(conf['subs']):
         r = praw.Reddit(conf['ua'])
         subobj = r.get_subreddit(sub)
@@ -88,11 +89,12 @@ def init(conf):
             setcache(sub, 'latest', None)
 
 def msg_submission(bot, target, submission):
-    bot.privmsg(target, u"{} [/u/{} in /r/{}] {}".format(
-        submission.title,
-        submission.author.name,
-        submission.subreddit.display_name,
-        submission.url))
+    msg = getcache('__all__', 'msg')
+    bot.privmsg(target, msg.format(
+        title=submission.title,
+        author=submission.author.name,
+        subname=submission.subreddit.display_name,
+        url=submission.url))
 
 def get_new(sub, limit=10):
     try:
