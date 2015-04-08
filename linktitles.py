@@ -17,19 +17,21 @@ class Plugin(object):
         self._channels = utils.as_list(
             self.bot.config['linktitles']['echo_channels'])
 
-    def get_title(self,link):
+    def get_title(self, link):
         try:
             req = urllib2.Request(link,
                 headers={"Accept-Language" : "fr-FR, fr, en"})
             soup = bs4.BeautifulSoup(urllib2.urlopen(req, timeout=5))
         except urllib2.HTTPError as e:
-            return u"{}: {}".format(e.code, e.msg)
+            self.bot.log.info("linktitles: {} ({})".format(
+                req.get_full_url(), e.code))
+            return None
         if soup.title is not None:
             return soup.title.string
 
     def echo(self, target, data):
         target = utils.as_channel(target)
-        self.bot.privmsg(target, data)
+        self.bot.privmsg(target, "linktitle: {}".format(data))
 
     @irc3.event(rfc.PRIVMSG)
     def getlink(self, mask=None, event=None, target=None, data=None):
