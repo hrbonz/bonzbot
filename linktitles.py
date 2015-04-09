@@ -23,7 +23,7 @@ class Plugin(object):
                 headers={"Accept-Language" : "fr-FR, fr, en"})
             soup = bs4.BeautifulSoup(urllib2.urlopen(req, timeout=5))
         except urllib2.HTTPError as e:
-            self.bot.log.info("linktitles: {} ({})".format(
+            self.bot.log.info(u"linktitles: {} ({})".format(
                 req.get_full_url(), e.code))
             return None
         if soup.title is not None:
@@ -31,7 +31,7 @@ class Plugin(object):
 
     def echo(self, target, data):
         target = utils.as_channel(target)
-        self.bot.privmsg(target, "linktitle: {}".format(data))
+        self.bot.privmsg(target, u"linktitle: {}".format(data))
 
     @irc3.event(rfc.PRIVMSG)
     def getlink(self, mask=None, event=None, target=None, data=None):
