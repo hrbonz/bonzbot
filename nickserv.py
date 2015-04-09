@@ -29,8 +29,10 @@ class Plugin(object):
             pass
         else:
             self.bot.privmsg(ns, 'identify %s %s' % (nick, password))
+            self.bot.log.info('Identification as {} requested'.format(nick))
 
     @irc3.event(r':(?P<ns>\w+)!NickServ@services. NOTICE (?P<nick>.*) :'
         r'You are now identified for ')
     def join_r_channels(self, ns=None, nick=None):
+        self.bot.log.info('Identification as {} successful'.format(nick))
         self.join()
