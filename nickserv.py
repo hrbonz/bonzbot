@@ -2,6 +2,27 @@
 import irc3
 from irc3 import utils
 
+__doc__ = """Freenode nickserv plugin for irc3
+
+Here's an example of configuration for this plugin:
+
+.. code-block:: ini
+
+    [nickserv]
+    pwd_file = nickserv_pwd.txt
+    r_channels = #bonz
+
+
+Options are:
+
+* ``pwd_file``: a file containing the password for nickserv, this is a
+  path relative to the plugin folder. Default value is
+  'nickserv_pwd.txt'
+* ``r_channels``: list of channels that require a nickname to be
+  registered. Those channels will be joined automatically after a
+  successful identification to nickserv.
+"""
+
 
 PWD_FILE = 'nickserv_pwd.txt'
 
@@ -12,7 +33,7 @@ class Plugin(object):
     def __init__(self, bot):
         self.bot = bot
         self._config = bot.config['nickserv']
-        self._channels = utils.as_list(self._config['invite_channels'])
+        self._channels = utils.as_list(self._config['r_channels'])
         self._nickserv_pwd = None
         pwd_file = 'pwd_file' in self._config \
             and self._config['pwd_file'] or PWD_FILE
