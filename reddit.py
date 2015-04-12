@@ -7,6 +7,47 @@ from irc3.plugins.cron import cron
 import praw
 
 
+__doc__ = """
+Reddit plugin for irc3
+======================
+
+This plugin polls a list of subreddits every minute for fresh content.
+It also adds two commands for direct access of latest content.
+
+Configuration
+-------------
+
+.. code-block:: ini
+
+    [reddit]
+    ua = #bonz butler for r/devel (by u/sberder)
+    subs = devel
+    echo_channels = #bonz
+    echo_msg = r/{subname}: {title} [u/{author}] {url}
+
+Options are:
+
+* ``ua``: user-agent to use when connecting to the reddit API
+  (mandatory)
+* ``subs``: space separated list of subreddits, the first one is
+  considered the default subreddit
+* ``echo_channels``: space separated list of channels where the bot
+  should send updates
+* ``echo_msg``: a python ``str.format()`` string that will be used when
+  sending updates. Available variables are:
+
+    * ``title``: submission title
+    * ``url``: submission URL
+    * ``author``: author of the submission
+    * ``subname``: subreddit display name where the submission was made
+
+Commands
+--------
+
+* ``!r last``: returns the last 10 submissions in the default subreddit
+* ``!r latest``: returns the last submission in the default subreddit
+"""
+
 _CACHE = {}
 
 
