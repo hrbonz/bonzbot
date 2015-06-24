@@ -24,6 +24,6 @@ def github_api(link):
     return json.load(res)
 
 INTENTS = [
-    (re.compile(r'https?://github.com/(?P<owner>[^ ]+)/(?P<repo>[^ ]+)', re.MULTILINE|re.UNICODE),
+    (re.compile(r'https?://github.com/(?P<owner>[^\/]+)/(?P<repo>[^\/]+)', re.MULTILINE|re.UNICODE),
      github_info)
 ]
