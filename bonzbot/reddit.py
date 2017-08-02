@@ -180,7 +180,7 @@ def poll_new(bot):
             except StopIteration:
                 setcache(ns, 'latest', None)
         else:
-            bot.log.info("[reddit] get latest submissions from "
+            bot.log.debug("[reddit] get latest submissions from "
                 "'{}'".format(sub.display_name))
             bot.log.debug("[reddit] latest cached submission from "
                 "'{}': {}".format(sub.display_name, latest.id))
