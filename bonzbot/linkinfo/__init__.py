@@ -26,7 +26,7 @@ class LinkinfoPlugin(object):
         self._channels = irc3.utils.as_list(
             self.bot.config['linkinfo']['channels'])
         herepath = os.path.dirname(__file__)
-        for importer, modname, ispkg in pkgutil.iter_modules(herepath):
+        for importer, modname, ispkg in pkgutil.iter_modules([herepath, ]):
             mod = importer.find_module(modname).load_module(modname)
             self.intents.extend(mod.INTENTS)
             self.bot.log.debug(u"linkinfo: add {}".format(modname))
