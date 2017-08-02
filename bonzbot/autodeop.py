@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import irc3
-from irc3 import rfc, utils
 
 import re
 
@@ -23,21 +22,22 @@ Options are:
   channel is listed, then bot will deop himself from all chans.
 """
 
-OP_RE = re.compile(r'\+.*o')
+OP_RE = re.compile(r'\+o+')
 
 
 @irc3.plugin
-class Plugin(object):
+class AutodeopPlugin(object):
 
     def __init__(self, bot):
         self.bot = bot
         self._channels = None
         if 'autodeop' in bot.config \
             and 'channels' in bot.config['autodeop']:
-            self._channels = utils.as_list(bot.config['autodeop']['channels'])
+            self._channels = irc3.utils.as_list(bot.config['autodeop']['channels'])
 
-    @irc3.event(rfc.MODE)
-    def deop(self, mask=None, event=None, target=None, modes=None, data=None):
+    @irc3.event(irc3.rfc.MODE)
+    def deop(self, tags=None, mask=None, event=None, target=None,
+            modes=None, data=None):
         if OP_RE.match(modes) and \
             (self._channels is None or target in self._channels):
             self.bot.mode(target, '-o', self.bot.nick)

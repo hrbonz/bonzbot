@@ -1,35 +1,44 @@
 # -*- coding: utf-8 -*-
-import re
-import urllib2
+import os.path
 import pkgutil
+import re
+try:
+    # python 3.x
+    from urllib.request import Request, urlopen
+except ImportError:
+    # python 2.x
+    from urllib2 import Request, urlopen
 
 import bs4
 import irc3
-from irc3 import rfc, utils
 
 
 LINK_RE = re.compile(r'(https?://[^ ]+)', re.MULTILINE|re.UNICODE)
 
 
 @irc3.plugin
-class Plugin(object):
+class LinkinfoPlugin(object):
+
+    intents = []
 
     def __init__(self, bot):
         self.bot = bot
-        self._channels = utils.as_list(
-            self.bot.config['linkinfo']['echo_channels'])
-        self._intents = []
-        for importer, modname, ispkg in pkgutil.iter_modules(__path__):
+        self._channels = irc3.utils.as_list(
+            self.bot.config['linkinfo']['channels'])
+        herepath = os.path.dirname(__file__)
+        for importer, modname, ispkg in pkgutil.iter_modules(herepath):
             mod = importer.find_module(modname).load_module(modname)
-            self._intents.extend(mod.INTENTS)
-        self._intents.append((LINK_RE, self.get_title))
+            self.intents.extend(mod.INTENTS)
+            self.bot.log.debug(u"linkinfo: add {}".format(modname))
+        self.intents.append((LINK_RE, self.get_title))
 
     def get_title(self, match):
+        """Default action when no other intent is found"""
         link = match.group(1)
         try:
-            req = urllib2.Request(link,
+            req = Request(link,
                 headers={"Accept-Language": "fr-FR, fr, en"})
-            soup = bs4.BeautifulSoup(urllib2.urlopen(req, timeout=5))
+            soup = bs4.BeautifulSoup(urlopen(req, timeout=5), "lxml")
         except urllib2.HTTPError as e:
             self.bot.log.error(u"linkinfo: {} ({})".format(
                 req.get_full_url(), e.code))
@@ -38,11 +47,11 @@ class Plugin(object):
             return " ".join(soup.title.string.split())
 
     def echo(self, target, data):
-        target = utils.as_channel(target)
+        target = irc3.utils.as_channel(target)
         self.bot.privmsg(target, u"linkinfo: {}".format(data))
 
     def get_info(self, link):
-        for (_re, _handler) in self._intents:
+        for (_re, _handler) in self.intents:
             match = _re.match(link)
             if match is not None:
                 self.bot.log.debug(u"linkinfo: {}".format(_re.pattern))
@@ -50,7 +59,7 @@ class Plugin(object):
         self.bot.log.debug(u"linkinfo: no intent ({})".format(link))
         return None
 
-    @irc3.event(rfc.PRIVMSG)
+    @irc3.event(irc3.rfc.PRIVMSG)
     def getlink(self, mask=None, event=None, target=None, data=None):
         if target in self._channels:
             links = LINK_RE.findall(data)

@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 import json
 import re
-import urllib2
+try:
+    # python 3.x
+    from urllib.request import Request, urlopen, HTTPError
+except ImportError:
+    # python 2.x
+    from urllib2 import Request, urlopen, HTTPError
 
 
 def github_info(match):
@@ -14,10 +19,10 @@ def github_info(match):
 
 def github_api(link):
     try:
-        req = urllib2.Request('https://api.github.com' + link,
+        req = Request('https://api.github.com' + link,
             headers={'Accept': 'application/vnd.github.v3+json'})
-        res = urllib2.urlopen(req, timeout=5)
-    except urllib2.HTTPError as e:
+        res = urlopen(req, timeout=5)
+    except HTTPError as e:
         print(u"linkinfo: {} ({})".format(
             req.get_full_url(), e.code))
         return None
