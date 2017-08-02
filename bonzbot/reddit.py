@@ -21,6 +21,7 @@ Configuration
 
     [reddit]
     ua = #bonz butler for r/devel (by u/sberder)
+    praw_bot = bonzbutler
     subs = devel
     echo_channels = #bonz
     echo_msg = r/{subname}: {title} [u/{author}] {url}
@@ -29,6 +30,7 @@ Options are:
 
 * ``ua``: user-agent to use when connecting to the reddit API
   (mandatory)
+* ``praw_bot``: bot name to use for selection of profile in praw.ini
 * ``subs``: space separated list of subreddits, the first one is
   considered the default subreddit
 * ``echo_channels``: space separated list of channels where the bot
@@ -52,12 +54,13 @@ _CACHE = {}
 
 
 @irc3.plugin
-class Plugin(object):
+class RedditPlugin(object):
 
     def __init__(self, bot):
         self.bot = bot
-        self._r = praw.Reddit(bot.config['reddit']['ua'])
-        self._sub = self._r.get_subreddit(utils.as_list(
+        self._r = praw.Reddit(bot.config['reddit']['praw_bot'],
+                              user_agent=bot.config['reddit']['ua'])
+        self.default_sub = self._r.subreddit(utils.as_list(
             bot.config['reddit']['subs'])[0])
         init(bot.config['reddit'])
 
@@ -89,9 +92,9 @@ class Plugin(object):
             self.help(mask.nick)
         elif args['<cmd>'] == "latest":
             self.msg_submission(mask.nick,
-                                get_new(sel._sub, limit=1).next())
+                                get_new(self.default_sub, limit=1).next())
         elif args['<cmd>'] == "last":
-            for submission in get_new(self._sub, limit=10):
+            for submission in get_new(self.default_sub, limit=10):
                 self.msg_submission(mask.nick, submission)
         else:
             self.help(mask.nick)
@@ -119,15 +122,15 @@ def getcache(ns, key):
 
 def init(conf):
     setcache('__all__', 'echo', utils.as_list(conf['echo_channels']))
-    setcache('__all__', 'msg', unicode(conf['echo_msg']))
-    for sub in utils.as_list(conf['subs']):
-        r = praw.Reddit(conf['ua'])
-        subobj = r.get_subreddit(sub)
-        setcache(sub, 'sub', subobj)
+    setcache('__all__', 'msg', conf['echo_msg'])
+    r = praw.Reddit(conf["praw_bot"], user_agent=conf['ua'])
+    for subname in utils.as_list(conf['subs']):
+        sub = r.subreddit(subname)
+        setcache(subname, 'sub', sub)
         try:
-            setcache(sub, 'latest', get_new(subobj, limit=1).next())
+            setcache(subname, 'latest', get_new(sub, limit=1).next())
         except StopIteration:
-            setcache(sub, 'latest', None)
+            setcache(subname, 'latest', None)
 
 def msg_submission(bot, target, submission):
     msg = getcache('__all__', 'msg')
@@ -139,7 +142,7 @@ def msg_submission(bot, target, submission):
 
 def get_new(sub, limit=10):
     try:
-        return sub.get_new(limit=limit)
+        return sub.new(limit=limit)
     except irc3.HTTPError:
         return None
 
@@ -161,7 +164,7 @@ def get_latest(sub, latest, offset=0):
         i += 1
     if i < 10:
         return new
-    return new.extend(get_latest(sub, latest, offset + 1))
+    return new.extend(get_latest(sub, latest, offset + 10))
 
 
 @cron('*/1 * * * *')
@@ -179,8 +182,13 @@ def poll_new(bot):
         else:
             bot.log.info("[reddit] get latest submissions from "
                 "'{}'".format(sub.display_name))
+            bot.log.debug("[reddit] latest cached submission from "
+                "'{}': {}".format(sub.display_name, latest.id))
             new = get_latest(sub, latest)
             if new:
+                new_ids = [n.id for n in new]
+                bot.log.debug("[reddit] new submission(s) from "
+                    "'{}': {}".format(sub.display_name, ', '.join(new_ids)))
                 setcache(ns, 'latest', new[0])
                 for submission in reversed(new):
                     for target in getcache('__all__', 'echo'):
