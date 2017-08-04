@@ -3,7 +3,8 @@ import json
 import re
 try:
     # python 3.x
-    from urllib.request import Request, urlopen, HTTPError
+    from urllib.request import Request, urlopen
+    from urllib.error import HTTPError
 except ImportError:
     # python 2.x
     from urllib2 import Request, urlopen, HTTPError

@@ -5,15 +5,17 @@ import re
 try:
     # python 3.x
     from urllib.request import Request, urlopen
+    from urllib.error import HTTPError
 except ImportError:
     # python 2.x
-    from urllib2 import Request, urlopen
+    from urllib2 import Request, urlopen, HTTPError
 
 import bs4
 import irc3
 
 
 LINK_RE = re.compile(r'(https?://[^ ]+)', re.MULTILINE|re.UNICODE)
+UA = "Mozilla/5.0 (X11; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0"
 
 
 @irc3.plugin
@@ -37,9 +39,12 @@ class LinkinfoPlugin(object):
         link = match.group(1)
         try:
             req = Request(link,
-                headers={"Accept-Language": "fr-FR, fr, en"})
+                    headers={
+                        "Accept-Language": "fr-FR, fr, en",
+                        "User-Agent": UA,
+                    })
             soup = bs4.BeautifulSoup(urlopen(req, timeout=5), "lxml")
-        except urllib2.HTTPError as e:
+        except HTTPError as e:
             self.bot.log.error(u"linkinfo: {} ({})".format(
                 req.get_full_url(), e.code))
             return None
