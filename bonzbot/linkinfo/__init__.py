@@ -2,20 +2,16 @@
 import os.path
 import pkgutil
 import re
-try:
-    # python 3.x
-    from urllib.request import Request, urlopen
-    from urllib.error import HTTPError
-except ImportError:
-    # python 2.x
-    from urllib2 import Request, urlopen, HTTPError
+import sys
 
-import bs4
 import irc3
+
+from .utils import get_title
+from .github import INTENTS as github_intents
+from .wikipedia import INTENTS as wikipedia_intents
 
 
 LINK_RE = re.compile(r'(https?://[^ ]+)', re.MULTILINE|re.UNICODE)
-UA = "Mozilla/5.0 (X11; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0"
 
 
 @irc3.plugin
@@ -27,29 +23,18 @@ class LinkinfoPlugin(object):
         self.bot = bot
         self._channels = irc3.utils.as_list(
             self.bot.config['linkinfo']['channels'])
-        herepath = os.path.dirname(__file__)
-        for importer, modname, ispkg in pkgutil.iter_modules([herepath, ]):
-            mod = importer.find_module(modname).load_module(modname)
-            self.intents.extend(mod.INTENTS)
-            self.bot.log.debug(u"linkinfo: add {}".format(modname))
+        if 'enabled' in self.bot.config['linkinfo']:
+            heremod = sys.modules[__name__]
+            for modname in irc3.utils.as_list(
+                    self.bot.config['linkinfo']['enabled']):
+                intents = getattr(heremod, "{}_intents".format(modname))
+                self.intents.extend(intents)
         self.intents.append((LINK_RE, self.get_title))
 
     def get_title(self, match):
         """Default action when no other intent is found"""
         link = match.group(1)
-        try:
-            req = Request(link,
-                    headers={
-                        "Accept-Language": "fr-FR, fr, en",
-                        "User-Agent": UA,
-                    })
-            soup = bs4.BeautifulSoup(urlopen(req, timeout=5), "lxml")
-        except HTTPError as e:
-            self.bot.log.error(u"linkinfo: {} ({})".format(
-                req.get_full_url(), e.code))
-            return None
-        if soup.title is not None:
-            return " ".join(soup.title.string.split())
+        return get_title(link)
 
     def echo(self, target, data):
         target = irc3.utils.as_channel(target)

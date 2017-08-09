@@ -1,15 +1,8 @@
 # -*- coding: utf-8 -*-
 import json
 import re
-try:
-    # python 3.x
-    from urllib.request import Request, urlopen
-    from urllib.error import HTTPError
-except ImportError:
-    # python 2.x
-    from urllib2 import Request, urlopen, HTTPError
 
-import bs4
+from .utils import get_uri
 
 
 def wikipedia_info(match):
@@ -22,13 +15,7 @@ def wikipedia_info(match):
     return "{} [...]".format(data["query"]["pages"][0]["extract"])
 
 def wikipedia_api(link):
-    try:
-        req = Request(link)
-        res = urlopen(req, timeout=5)
-    except HTTPError as e:
-        print(u"linkinfo: {} ({})".format(
-            req.get_full_url(), e.code))
-        return None
+    res = get_uri(link)
     return json.loads(res.read().decode("utf-8"))
 
 

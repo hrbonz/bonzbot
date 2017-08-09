@@ -1,31 +1,22 @@
 # -*- coding: utf-8 -*-
 import json
 import re
-try:
-    # python 3.x
-    from urllib.request import Request, urlopen, HTTPError
-except ImportError:
-    # python 2.x
-    from urllib2 import Request, urlopen, HTTPError
+
+from .utils import get_title, get_uri
 
 
 def github_info(match):
-    res = github_api('/repos/{}/{}'.format(
+    api_data = github_api('/repos/{}/{}'.format(
         match.group('owner'), match.group('repo')))
-    return "{desc} ({lang})".format(
-        desc=res['description'],
-        lang=res['language'],
+    title = get_title(match.string)
+    return "{title} ({lang})".format(
+        title=title,
+        lang=api_data['language'],
     )
 
 def github_api(link):
-    try:
-        req = Request('https://api.github.com' + link,
+    res = get_uri('https://api.github.com' + link,
             headers={'Accept': 'application/vnd.github.v3+json'})
-        res = urlopen(req, timeout=5)
-    except HTTPError as e:
-        print(u"linkinfo: {} ({})".format(
-            req.get_full_url(), e.code))
-        return None
     return json.loads(res.read().decode("utf-8"))
 
 
