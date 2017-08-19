@@ -11,6 +11,7 @@ import bs4
 
 
 UA = "Mozilla/5.0 (X11; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0"
+MSG_SIZE_LIMIT = 400
 
 
 def get_uri(link, headers=None):
@@ -38,3 +39,22 @@ def get_title(link):
     soup = bs4.BeautifulSoup(res, "lxml")
     if soup.title is not None:
         return " ".join(soup.title.string.split())
+
+def split_msg(text):
+    """Split text in messages of full sentences of max size
+    MSG_SIZE_LIMIT
+    """
+    chunks = []
+    chunk = ""
+    for sentence in text.split(". "):
+        print(sentence)
+        if len(chunk) == 0:
+            chunk = sentence
+        elif len(chunk) + len(sentence) <= MSG_SIZE_LIMIT:
+            chunk = ". ".join([chunk, sentence])
+        else:
+            chunk += "."
+            chunks.append(chunk.strip())
+            chunk = sentence
+    chunks.append(chunk)
+    return chunks

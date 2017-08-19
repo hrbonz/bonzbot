@@ -6,7 +6,7 @@ import sys
 
 import irc3
 
-from .utils import get_title
+from .utils import get_title, split_msg
 from .github import INTENTS as github_intents
 from .wikipedia import INTENTS as wikipedia_intents
 
@@ -38,7 +38,9 @@ class LinkinfoPlugin(object):
 
     def echo(self, target, data):
         target = irc3.utils.as_channel(target)
-        self.bot.privmsg(target, u"linkinfo: {}".format(data))
+        msgs = split_msg(u"linkinfo: {}".format(data))
+        for msg in msgs:
+            self.bot.privmsg(target, msg)
 
     def get_info(self, link):
         for (_re, _handler) in self.intents:

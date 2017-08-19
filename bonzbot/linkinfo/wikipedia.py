@@ -8,7 +8,7 @@ from .utils import get_uri
 def wikipedia_info(match):
     data = wikipedia_api("https://{}.wikipedia.org/w/api.php?format=json"
             "&action=query&prop=extracts&titles={}&exintro=&explaintext="
-            "&exsentences=2&formatversion=2".format(
+            "&exsentences=4&formatversion=2".format(
             match.group("lang"), match.group("page")))
     # FIXME(hr): split the text so everything gets through. There's a
     # pyload size limitation when sending a message
