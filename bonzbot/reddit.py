@@ -5,6 +5,7 @@ from irc3.plugins.command import command
 from irc3.plugins.cron import cron
 
 import praw
+from prawcore.exceptions import ServerError
 
 
 __doc__ = """
@@ -152,18 +153,21 @@ def get_latest(sub, latest, offset=0):
         return []
     new = []
     lim = 10 + offset * 10
-    # FIXME catch StoppIteration and "do the right thing"
-    submissions = get_new(sub, limit=lim)
-    for i in range(offset * 10):
-        submissions.next()
-    i = 0
-    for submission in submissions:
-        if submission.id == latest.id:
+    # FIXME catch StopIteration and "do the right thing"
+    try:
+        submissions = get_new(sub, limit=lim)
+        for i in range(offset * 10):
+            submissions.next()
+        i = 0
+        for submission in submissions:
+            if submission.id == latest.id:
+                return new
+            new.append(submission)
+            i += 1
+        if i < 10:
             return new
-        new.append(submission)
-        i += 1
-    if i < 10:
-        return new
+    except ServerError as e:
+        bot.log.info("[reddit] get_latest() error ({})".format(e.msg))
     return new.extend(get_latest(sub, latest, offset + 10))
 
 
