@@ -34,7 +34,11 @@ stems = [
     {
         "trigger": re.compile(r"good bot"),
         "answers": ["blip blup", "/me blushes", "Oh you, you're too much"],
-    }
+    },
+    {
+        "trigger": re.compile(r"bonzbutler: sudo"),
+        "answers": ["do it yourself", "*zog* *zog*", "whatever..."],
+    },
 ]
 
 
