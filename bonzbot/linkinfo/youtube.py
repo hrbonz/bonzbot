@@ -12,7 +12,7 @@ def youtube_info(match, config):
         apikey = apikey_fd.read().strip()
 
     data = youtube_api("https://www.googleapis.com/youtube/v3/videos?"
-            "key={apikey}&part=snippet,statistics&id={vidid}".format(
+            "key={apikey}&part=snippet&id={vidid}".format(
             apikey=apikey, vidid=match.group("vidid")))
 
     if len(data["items"]) != 0:
