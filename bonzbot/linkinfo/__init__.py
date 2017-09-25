@@ -31,7 +31,7 @@ class LinkinfoPlugin(object):
                 self.intents.extend(intents)
         self.intents.append((LINK_RE, self.get_title))
 
-    def get_title(self, match):
+    def get_title(self, match, config):
         """Default action when no other intent is found"""
         link = match.group(1)
         return get_title(link)
@@ -47,7 +47,7 @@ class LinkinfoPlugin(object):
             match = _re.match(link)
             if match is not None:
                 self.bot.log.debug(u"linkinfo: {}".format(_re.pattern))
-                return _handler(match)
+                return _handler(match, self.bot.config["linkinfo"])
         self.bot.log.debug(u"linkinfo: no intent ({})".format(link))
         return None
 

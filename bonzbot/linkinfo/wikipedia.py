@@ -5,7 +5,7 @@ import re
 from .utils import get_uri
 
 
-def wikipedia_info(match):
+def wikipedia_info(match, config):
     data = wikipedia_api("https://{}.wikipedia.org/w/api.php?format=json"
             "&action=query&prop=extracts&titles={}&exintro=&explaintext="
             "&exsentences=4&formatversion=2".format(

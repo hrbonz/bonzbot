@@ -5,7 +5,7 @@ import re
 from .utils import get_title, get_uri
 
 
-def github_info(match):
+def github_info(match, config):
     api_data = github_api('/repos/{}/{}'.format(
         match.group('owner'), match.group('repo')))
     title = get_title(match.string)
