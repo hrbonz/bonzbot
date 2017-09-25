@@ -9,6 +9,7 @@ import irc3
 from .utils import get_title, split_msg
 from .github import INTENTS as github_intents
 from .wikipedia import INTENTS as wikipedia_intents
+from .youtube import INTENTS as youtube_intents
 
 
 LINK_RE = re.compile(r'(https?://[^ ]+)', re.MULTILINE|re.UNICODE)
